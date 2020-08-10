@@ -3,7 +3,7 @@ plugins {
 }
 apply plugin: 'java'
 
-group 'com.learnwiremock'
+group 'com.karpur.wiremock'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = '1.8'
