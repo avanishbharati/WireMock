@@ -24,6 +24,7 @@ import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static com.karpur.wiremock.constants.MoviesAppConstants.GET_ALL_MOVIES_V1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -59,6 +60,27 @@ public class MoviesRestClientTest {
         //given
 
         stubFor(get(anyUrl())
+            .willReturn(WireMock.aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .withBodyFile("all-movies.json")));
+
+        //When
+        List<Movie> movieList = moviesRestClient.retrieveAllMovies();
+        LOGGER.info("Number of movies: {}", movieList.size());
+        LOGGER.info("Movie List : {}", movieList);
+
+        //Then
+        assertTrue(movieList.size() > 0);
+
+    }
+
+    @Test
+    void retrieveAllMovies_matchesUrl(){
+
+        //given
+
+        stubFor(get(urlEqualTo(GET_ALL_MOVIES_V1))
             .willReturn(WireMock.aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
