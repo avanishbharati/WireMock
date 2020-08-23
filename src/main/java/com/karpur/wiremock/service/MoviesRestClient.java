@@ -41,7 +41,7 @@ public class MoviesRestClient {
                 .bodyToMono(Movie.class) //body is converted to Mono(Represents single item)
                 .block();
         } catch (WebClientResponseException ex) {
-            LOGGER.error("WebClientResponseException - Error Message is : {} ", ex, ex.getResponseBodyAsString());
+            LOGGER.error("WebClientResponseException in retrieveMovieById. Status code is {} and the message is {} ", ex.getRawStatusCode(), ex.getResponseBodyAsString());
             throw new MovieErrorResponse(ex.getStatusText(), ex);
         } catch (Exception ex) {
             LOGGER.error("Exception - The Error Message is {} ", ex.getMessage());
@@ -81,7 +81,7 @@ public class MoviesRestClient {
      * @param year - Integer (Example : 2012,2013 etc.,)
      * @return - List<Movie>
      */
-    public List<Movie> retreieveMovieByYear(Integer year) {
+    public List<Movie> retrieveMovieByYear(Integer year) {
         String retrieveByYearUri = UriComponentsBuilder.fromUriString( MOVIE_BY_YEAR_QUERY_PARAM_V1)
             .queryParam("year", year)
             .buildAndExpand()
