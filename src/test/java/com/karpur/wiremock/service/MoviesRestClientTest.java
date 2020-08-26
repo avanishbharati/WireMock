@@ -508,6 +508,42 @@ public class MoviesRestClientTest {
 
     }
 
+    //Verify stubs
+    @Test
+    void deleteMovieByName() {
+        //given
+        Movie movie = new Movie(null, "Toys Story 5", 2019,"Tom Hanks, Tim Allen", LocalDate.of(2019, 06, 20));
+
+        stubFor(post(urlPathEqualTo(ADD_MOVIE_V1))
+            .withRequestBody(matchingJsonPath(("$.name"),equalTo("Toys Story 5")))
+            .withRequestBody(matchingJsonPath(("$.cast"), containing("Tom")))
+            .willReturn(WireMock.aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .withBodyFile("add-movie-template.json")));
+        Movie addedMovie = moviesRestClient.addNewMovie(movie);
+
+        String expectedErrorMessage = "Movie Deleted Successfully";
+        stubFor(delete(urlEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1 + "?movie_name=Toys%20Story%205"))
+            .willReturn(WireMock.aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+
+        //when
+        String responseMessage = moviesRestClient.deleteMovieByName(addedMovie.getName());
+
+        //then
+        assertEquals(expectedErrorMessage, responseMessage);
+
+        //Verify DSL ( see deleteMovieByName )
+        verify(exactly(1),postRequestedFor(urlPathEqualTo(ADD_MOVIE_V1))
+            .withRequestBody(matchingJsonPath(("$.name"),equalTo("Toys Story 5")))
+            .withRequestBody(matchingJsonPath(("$.cast"), containing("Tom"))));
+
+        //check if the delete call was made
+        verify(exactly(1),deleteRequestedFor(urlEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1+"?movie_name=Toys%20Story%205")));
+
+    }
 
     @Test
     @Disabled

@@ -22,14 +22,23 @@ public class MoviesRestClient {
         this.webClient = webClient;
     }
 
-    public List<Movie> retrieveAllMovies(){
+    public List<Movie> retrieveAllMovies() {
+
+        try {
 
         return webClient.get().uri(GET_ALL_MOVIES_V1)
-                        .retrieve()
-                        .bodyToFlux(Movie.class)
-                        .collectList()
-                        .block();
+            .retrieve()
+            .bodyToFlux(Movie.class)
+            .collectList()
+            .block();
 
+        } catch (WebClientResponseException ex) {
+            LOGGER.error("WebClientResponseException in retrieveAllMovies. Status code is {} and the message is {} ", ex.getRawStatusCode(), ex.getResponseBodyAsString());
+            throw new MovieErrorResponse(ex.getStatusText(), ex);
+        } catch (Exception ex) {
+            LOGGER.error("Exception in retrieveAllMovies and the message is {} ", ex.getMessage() + ex);
+            throw new MovieErrorResponse(ex);
+        }
     }
 
     public Movie retrieveMovieById(Integer movieId) {
@@ -169,5 +178,29 @@ public class MoviesRestClient {
 
         return response;
 
+    }
+
+    public String deleteMovieByName(String movieName){
+
+        try{
+            String deleteMovieByNameURI = UriComponentsBuilder.fromUriString(MOVIE_BY_NAME_QUERY_PARAM_V1)
+                .queryParam("movie_name", movieName)
+                .buildAndExpand()
+                .toUriString();
+
+            webClient.delete().uri(deleteMovieByNameURI)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+
+        }catch (WebClientResponseException ex) {
+            LOGGER.error("WebClientResponseException in deleteMovie. Status code is {} and the message is {} ", ex.getRawStatusCode(), ex.getResponseBodyAsString());
+            throw new MovieErrorResponse(ex.getStatusText(), ex);
+        } catch (Exception ex) {
+            LOGGER.error("Exception in deleteMovie and the message is {} ", ex);
+            throw new MovieErrorResponse(ex);
+        }
+
+        return "Movie Deleted Successfully";
     }
 }
